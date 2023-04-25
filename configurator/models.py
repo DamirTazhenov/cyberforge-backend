@@ -47,7 +47,7 @@ class Housing(BaseModel):
     # number_of_3_5_internal_bays = models.PositiveIntegerField()
 
     def __str__(self):
-        return f"{self.case_form_factor} case for {self.compatible_board_form_factor} motherboards"
+        return f"{self.name} case for {self.compatible_board_form_factor} motherboards, {' x '.join([i+'cm' for i in self.dimensions.split('x')])}"
 
 
 class PowerSupplyUnit(BaseModel):
@@ -298,7 +298,7 @@ class Accessory(BaseModel):
 class Modification(models.Model):
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, default='')
-    author_id = models.PositiveIntegerField(blank=True)
+    author_name = models.CharField(max_length=255, blank=True)
     likes = models.PositiveIntegerField(default=0)
 
     housing = models.ForeignKey(Housing, on_delete=models.CASCADE)
