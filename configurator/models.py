@@ -23,14 +23,6 @@ class Cooling(BaseModel):
     socket = models.CharField(max_length=50)
     maximum_noise_level = models.PositiveIntegerField()
 
-    # maximum_tdp = models.PositiveIntegerField()
-    # fan_diameter = models.PositiveIntegerField()
-    # maximum_rotation_speed = models.PositiveIntegerField()
-    # adjustable_speed = models.BooleanField(default=False)
-    # cooler_height = models.PositiveIntegerField()
-    # connector = models.CharField(max_length=8)
-    # air_flow = models.DecimalField(max_digits=5, decimal_places=1)
-
     def __str__(self):
         return f"{self.type} for {self.socket}"
 
@@ -48,9 +40,7 @@ class Housing(BaseModel):
 
     case_form_factor = models.CharField(max_length=10, choices=CASE_FORM_FACTOR_CHOICES)
     compatible_board_form_factor = models.CharField(max_length=10)
-    length = models.FloatField()
-    width = models.FloatField()
-    height = models.FloatField()
+    dimensions = models.CharField(max_length=15, help_text='(WxHxD) in cm', blank=True, null=True)
 
     # power_supply_unit_location = models.CharField(max_length=10)
     # number_of_5_25_bays = models.PositiveIntegerField()
@@ -142,9 +132,18 @@ class GraphicsCard(BaseModel):
         ('GDDR6X', 'GDDR6X')
     ]
 
+    INTERFACE_CHOICES = [
+        ('PCIe 3.0', 'PCIe 3.0'),
+        ('PCIe 4.0', 'PCIe 4.0'),
+        ('AGP', 'AGP'),
+    ]
+
+
+    interface = models.CharField(max_length=20, choices=INTERFACE_CHOICES)
     video_memory_capacity = models.PositiveIntegerField()
     rated_power = models.PositiveIntegerField(help_text='in W')
     video_memory_type = models.CharField(max_length=6, choices=MEMORY_TYPE_CHOICES)
+    technical_process = models.PositiveIntegerField(help_text='in nm', default=8)
     gpu_frequency = models.DecimalField(max_digits=6, decimal_places=0)
     chipset_model = models.CharField(max_length=10, choices=CHIPSET_MODEL_CHOICES)
     connectors = models.CharField(max_length=50)
@@ -153,7 +152,7 @@ class GraphicsCard(BaseModel):
     # number_of_universal_processors = models.PositiveIntegerField()
 
     def __str__(self):
-        return f"{self.chipset_model} {self.video_memory_capacity}GB ({self.video_memory_type}, {self.gpu_frequency} MHz, connectors: {self.connectors})"
+        return f"{self.chipset_model} {self.video_memory_capacity}GB ({self.video_memory_type}, {self.gpu_frequency} MHz, technical process - {self.technical_process}nm, connectors: {self.connectors})"
 
 
 class Motherboard(BaseModel):

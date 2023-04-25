@@ -1,11 +1,14 @@
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 from .models import Modification
 from .serializers import *
 
 
 class ModificationList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     queryset = Modification.objects.all()
-    serializer_class = ModificationsSerializer
+    serializer_class = ModificationSerializer
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -30,6 +33,20 @@ class ModificationDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mix
         return self.destroy(request, *args, **kwargs)
 
 
+@api_view(['GET', 'POST'])
+def CoolingListF(request):
+    if request.method == "GET":
+        cooling = Cooling.objects.all()
+        serializer = CoolingSerializer2(cooling, many=True)
+        return Response(serializer.data)
+    if request.method == "POST":
+        serializer = CoolingSerializer2(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
 class CoolingList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     queryset = Cooling.objects.all()
     serializer_class = CoolingSerializer
@@ -43,7 +60,7 @@ class CoolingList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Gener
 
 class CoolingDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):
     queryset = Cooling.objects.all()
-    serializer_class = CoolingSerializer
+    serializer_class = CoolingSerializer2
     lookup_url_kwarg = 'id'
 
     def get(self, request, *args, **kwargs):
@@ -56,6 +73,28 @@ class HousingList(mixins.ListModelMixin, generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def HousingDetailF(request, id):
+    try:
+        housing = Housing.objects.filter(id=id).get()
+    except Housing.DoesNotExist:
+        return Response({'message': 'Housing with this ID is not found!'}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = HousingSerializer(housing)
+        return Response(serializer.data)
+    if request.method == 'PUT':
+        serializer = HousingSerializer(housing, data=request.data)
+        if serializer.is_valid():
+            if not request.data.get('images'):
+                serializer.validated_data.pop('images', None)
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == "DELETE":
+        housing.delete()
+        return Response({'message': 'Housing item was deleted succesfully!'})
 
 
 class HousingDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):
