@@ -11,6 +11,9 @@ class User(AbstractUser):
 
     REQUIRED_FIELDS = []
 
+    class Meta:
+        db_table = 'users_user'
+
 
 # class CustomModification(models.Model):
 #
