@@ -52,7 +52,8 @@ class CoolingSerializer2(serializers.Serializer, get_spec_ser):
             if value is not None:
                 if label['slug'] == 'sockets':
                     serializer = SocketSerializer(value, many=True)
-                    value = serializer.data
+                    value = [item['socket'] for item in serializer.data]
+                    value = ", ".join(value)
                 spec_data.append({
                     'slug': label['slug'],
                     'label': label['label'],
@@ -206,7 +207,7 @@ class CPUSerializer(serializers.ModelSerializer, get_spec_ser):
             if value is not None:
                 if label['slug'] == 'socket':
                     serializer = SocketSerializer(value)
-                    value = serializer.data
+                    value = serializer.data['socket']
                 spec_data.append({
                     'slug': label['slug'],
                     'label': label['label'],

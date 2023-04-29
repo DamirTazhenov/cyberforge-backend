@@ -16,9 +16,10 @@ class PaginationClass(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 10
 
+    class Meta:
+        ordering = ['-id']
 
 class ModificationList(CsrfExemptMixin, mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PaginationClass
 
     def get_serializer_class(self):
