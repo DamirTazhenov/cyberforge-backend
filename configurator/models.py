@@ -267,7 +267,7 @@ class CPU(BaseModel):
     ]
 
     socket = models.ForeignKey(Socket, on_delete=models.RESTRICT)
-    processor_type = models.CharField(max_length=10, choices=PROCESSOR_TYPE_CHOICES)
+    # processor_type = models.CharField(max_length=10, choices=PROCESSOR_TYPE_CHOICES)
     total_number_of_cores = models.PositiveIntegerField()
     total_number_of_threads = models.PositiveIntegerField()
     clock_frequency = models.FloatField(help_text='in MHz')
@@ -371,7 +371,7 @@ class Modification(models.Model):
     components_labels = [
         {'slug': 'housing', 'label': 'Корпус'},
         {'slug': 'motherboard', 'label': 'Материнская плата'},
-        {'slug': 'power_supply', 'label': 'Блок питания'},
+        {'slug': 'power_supply_unit', 'label': 'Блок питания'},
         {'slug': 'cpu', 'label': 'Процессор'},
         {'slug': 'gpu', 'label': 'Видеокарта'},
         {'slug': 'ram', 'label': 'RAM память'},
@@ -386,7 +386,7 @@ class Modification(models.Model):
 
     housing = models.ForeignKey(Housing, on_delete=models.CASCADE)
     motherboard = models.ForeignKey(Motherboard, on_delete=models.CASCADE)
-    power_supply = models.ForeignKey(PowerSupplyUnit, on_delete=models.CASCADE)
+    power_supply_unit = models.ForeignKey(PowerSupplyUnit, on_delete=models.CASCADE)
     cpu = models.ForeignKey(CPU, on_delete=models.CASCADE)
     gpu = models.ForeignKey(GPU, on_delete=models.CASCADE)
     ram = models.ForeignKey(RAM, on_delete=models.CASCADE)

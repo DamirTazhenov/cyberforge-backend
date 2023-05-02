@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.templatetags.static import static
 
 from main import settings
 from .models import Cooling, Housing, PowerSupplyUnit, RAM, GPU, Motherboard, CPU, Memory, Socket
@@ -79,7 +78,7 @@ class CoolingSerializer2(serializers.Serializer, get_spec_ser):
                         value = [item['socket'] for item in serializer.data]
                         value = ", ".join(value)
                     spec_data.append({
-                        # 'slug': label['slug'],
+                        'slug': label['slug'],
                         'label': label['label'],
                         'value': str(value)
                     })
@@ -220,7 +219,7 @@ class CPUSerializer(serializers.ModelSerializer, get_spec_ser):
         fields = '__all__'
         extra_kwargs = {
             'socket': {'write_only': True},
-            'processor_type': {'write_only': True},
+            # 'processor_type': {'write_only': True},
             'total_number_of_cores': {'write_only': True},
             'total_number_of_threads': {'write_only': True},
             'clock_frequency': {'write_only': True},
@@ -237,7 +236,7 @@ class CPUSerializer(serializers.ModelSerializer, get_spec_ser):
                     serializer = SocketSerializer(value)
                     value = serializer.data['socket']
                 spec_data.append({
-                    # 'slug': label['slug'],
+                    'slug': label['slug'],
                     'label': label['label'],
                     'value': str(value)
                 })

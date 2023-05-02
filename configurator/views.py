@@ -1,11 +1,12 @@
-from braces.views import CsrfExemptMixin
+from django.db.models import Q
 from django.contrib.auth import get_user_model
-from rest_framework import generics, mixins, status
+from rest_framework import generics, mixins, status, filters
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
+from .filters import ComponentFilter
 from .serializers import *
 
 User = get_user_model()
@@ -17,11 +18,37 @@ class PaginationClass(PageNumberPagination):
     max_page_size = 10
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['id']
 
 
-class ModificationList(CsrfExemptMixin, mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
-    pagination_class = PaginationClass
+class PaginationClassModification(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 10
+
+    class Meta:
+        ordering = ['-likes']
+
+
+# class ComponentViewSet:
+#     def get_queryset(self):
+#         queryset = super().get_queryset()
+#
+#         # Получаем значение параметра name из GET-запроса
+#         name = self.request.query_params.get('name')
+#         min_price = self.request.query_params.get('min_price')
+#         max_price = self.request.query_params.get('max_price')
+#
+#         # Если параметр name присутствует, фильтруем по имени
+#         if name:
+#             queryset = queryset.filter(Q(name__icontains=name, ))
+#
+#         return queryset
+
+
+class ModificationList(mixins.UpdateModelMixin, mixins.ListModelMixin, mixins.CreateModelMixin,
+                       generics.GenericAPIView):
+    pagination_class = PaginationClassModification
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -36,6 +63,9 @@ class ModificationList(CsrfExemptMixin, mixins.ListModelMixin, mixins.CreateMode
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         serializer.save(author_name=self.request.user.username)
@@ -85,6 +115,7 @@ class CoolingList(mixins.ListModelMixin, generics.GenericAPIView):
     serializer_class = CoolingSerializer2
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PaginationClass
+    filterset_class = ComponentFilter
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -105,6 +136,8 @@ class HousingList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Gener
     serializer_class = HousingSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PaginationClass
+    filterset_class = ComponentFilter
+
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -151,6 +184,8 @@ class PowerSupplyUnitList(mixins.ListModelMixin, generics.GenericAPIView):
     serializer_class = PowerSupplyUnitSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PaginationClass
+    filterset_class = ComponentFilter
+
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -171,6 +206,8 @@ class RAMList(mixins.ListModelMixin, generics.GenericAPIView):
     serializer_class = RAMSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PaginationClass
+    filterset_class = ComponentFilter
+
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -191,6 +228,8 @@ class GPUList(mixins.ListModelMixin, generics.GenericAPIView):
     serializer_class = GPUSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PaginationClass
+    filterset_class = ComponentFilter
+
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -211,6 +250,8 @@ class MotherboardList(mixins.ListModelMixin, generics.GenericAPIView):
     serializer_class = MotherboardSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PaginationClass
+    filterset_class = ComponentFilter
+
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -231,6 +272,7 @@ class CPUList(mixins.ListModelMixin, generics.GenericAPIView):
     serializer_class = CPUSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PaginationClass
+    filterset_class = ComponentFilter
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -251,6 +293,7 @@ class MemoryList(mixins.ListModelMixin, generics.GenericAPIView):
     serializer_class = MemorySerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PaginationClass
+    filterset_class = ComponentFilter
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
