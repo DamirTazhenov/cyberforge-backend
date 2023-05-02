@@ -255,13 +255,11 @@ class MemorySerializer(serializers.ModelSerializer, get_spec_ser):
         model = Memory
         fields = '__all__'
         extra_kwargs = {
-            'socket': {'write_only': True},
-            'processor_type': {'write_only': True},
-            'total_number_of_cores': {'write_only': True},
-            'total_number_of_threads': {'write_only': True},
-            'clock_frequency': {'write_only': True},
-            'process_technology': {'write_only': True},
-            'rated_power': {'write_only': True},
+            'interface': {'write_only': True},
+            'form_factor': {'write_only': True},
+            'disk_capacity': {'write_only': True},
+            'read_speed': {'write_only': True},
+            'write_speed': {'write_only': True},
         }
 
     def to_representation(self, instance):

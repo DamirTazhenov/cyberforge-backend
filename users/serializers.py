@@ -1,7 +1,23 @@
-from rest_framework import serializers
+from rest_framework_jwt.settings import api_settings
+from rest_framework import serializers, status
+from rest_framework_jwt.views import ObtainJSONWebToken
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from configurator.serializers import ModificationSerializer, ModificationGetSerializer
 from .models import User
+
+
+class CustomObtainJSONWebToken(ObtainJSONWebToken):
+    def post(self, request, *args, **kwargs):
+        response = super(CustomObtainJSONWebToken, self).post(request, *args, **kwargs)
+        if response.status_code == status.HTTP_200_OK:
+            token = response.data['token']
+            jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
+            user_id = jwt_decode_handler(token)['user_id']
+            user = User.objects.get(id=user_id)
+            user_serializer = UserSerializer(user)
+            response.data['user'] = user_serializer.data
+        return response
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,5 +36,16 @@ class UserSerializer(serializers.ModelSerializer):
         if password is not None:
             user.set_password(password)
             user.save()
-        return user
+
+        refresh = RefreshToken.for_user(user)
+
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': user.id,
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+        }
 

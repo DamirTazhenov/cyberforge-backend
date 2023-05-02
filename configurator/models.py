@@ -279,7 +279,7 @@ class CPU(BaseModel):
     # integrated_graphics_system = models.CharField(max_length=50)
 
     def __str__(self):
-        return f"{self.processor_type} {self.total_number_of_cores} cores and {self.total_number_of_threads} threads ({self.socket})"
+        return f"{self.name} {self.total_number_of_cores} cores and {self.total_number_of_threads} threads ({self.socket})"
 
 
 class Memory(BaseModel):

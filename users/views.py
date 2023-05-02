@@ -7,9 +7,12 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework_jwt.serializers import jwt_encode_handler, jwt_payload_handler
 from rest_framework_jwt.views import verify_jwt_token
+from rest_framework_jwt.settings import api_settings
 
 from main import settings
+
 from users.serializers import UserSerializer
 
 User = get_user_model()
@@ -38,12 +41,18 @@ class LoginPageAPIView(CsrfExemptMixin, APIView):
         return response
 
 
+
 class RegisterPageAPIView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.create(serializer.validated_data)
-        return Response(serializer.data)
+
+        token = jwt_encode_handler(jwt_payload_handler(request.user))
+        return Response({
+            'token': token,
+            'user': serializer.data
+        })
 
 
 class UserAPIView(APIView):
@@ -66,4 +75,3 @@ class LogoutAPIView(APIView):
             "message": "Successfully logged out."
         }
         return response
-
