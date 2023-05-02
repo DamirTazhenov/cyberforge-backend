@@ -42,7 +42,7 @@ class RegisterPageAPIView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.create(serializer.validated_data)
         return Response(serializer.data)
 
 
