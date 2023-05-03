@@ -38,9 +38,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get('request')
-        validated_data['modifications'] = Modification.objects.filter(user=request.user)
+
         password = validated_data.pop('password', None)
-        user = super().create(validated_data)
+        user = self.Meta.model(**validated_data)
         if password is not None:
             user.set_password(password)
             user.save()
