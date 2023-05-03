@@ -58,7 +58,7 @@ class RegisterPageAPIView(APIView):
 class UserAPIView(APIView):
     def get(self, request):
         if request.user.is_authenticated:
-            serializer = UserSerializer(request.user)
+            serializer = UserSerializer(request.user,  context={'request': request})
 
             return Response(serializer.data)
         else:

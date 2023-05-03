@@ -277,7 +277,7 @@ class ModificationGetSerializer(serializers.Serializer):
 
     housing = HousingSerializer
     motherboard = MotherboardSerializer
-    power_supply = PowerSupplyUnitSerializer
+    power_supply_unit = PowerSupplyUnitSerializer
     cpu = CPUSerializer
     gpu = GPUSerializer
     ram = RAMSerializer
@@ -287,7 +287,7 @@ class ModificationGetSerializer(serializers.Serializer):
     comp = {
         'housing': housing,
         "motherboard": motherboard,
-        'power_supply': power_supply,
+        'power_supply_unit': power_supply_unit,
         'cpu': cpu,
         'gpu': gpu,
         'ram': ram,
@@ -331,7 +331,7 @@ class ModificationGetSerializer(serializers.Serializer):
         instance.likes = validated_data.get('likes', instance.likes)
         instance.housing = validated_data.get('housing', instance.housing)
         instance.motherboard = validated_data.get('motherboard', instance.motherboard)
-        instance.power_supply = validated_data.get('power_supply', instance.power_supply)
+        instance.power_supply_unit = validated_data.get('power_supply_unit', instance.power_supply_unit)
         instance.cpu = validated_data.get('cpu', instance.cpu)
         instance.gpu = validated_data.get('gpu', instance.gpu)
         instance.ram = validated_data.get('ram', instance.ram)
@@ -340,6 +340,10 @@ class ModificationGetSerializer(serializers.Serializer):
         instance.save()
         return instance
 
+    def get_image(self, obj):
+        request = self.context.get('request')
+        image_url = obj.image.url
+        return request.build_absolute_uri(image_url)
 
 class ModificationSerializer(serializers.ModelSerializer):
     is_compatible = serializers.BooleanField(read_only=True)

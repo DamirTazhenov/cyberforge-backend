@@ -1,8 +1,10 @@
+from rest_framework.request import Request
 from rest_framework_jwt.settings import api_settings
 from rest_framework import serializers, status
 from rest_framework_jwt.views import ObtainJSONWebToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from configurator.models import Modification
 from configurator.serializers import ModificationSerializer, ModificationGetSerializer
 from .models import User
 
@@ -15,13 +17,16 @@ class CustomObtainJSONWebToken(ObtainJSONWebToken):
             jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
             user_id = jwt_decode_handler(token)['user_id']
             user = User.objects.get(id=user_id)
-            user_serializer = UserSerializer(user)
+            user_serializer = UserSerializer(user,  context={'request': request})
             response.data['user'] = user_serializer.data
         return response
 
 
 class UserSerializer(serializers.ModelSerializer):
-    modifications = ModificationSerializer(many=True, read_only=True)
+    modifications = ModificationGetSerializer(many=True, read_only=True)
+
+
+
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email', 'phone', 'username', 'password', 'modifications')
@@ -30,7 +35,10 @@ class UserSerializer(serializers.ModelSerializer):
         }
         read_only_fields = ['modifications']
 
+
     def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['modifications'] = Modification.objects.filter(user=request.user)
         password = validated_data.pop('password', None)
         user = super().create(validated_data)
         if password is not None:
