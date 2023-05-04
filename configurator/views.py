@@ -88,10 +88,18 @@ class LikeModificationView(mixins.CreateModelMixin, generics.GenericAPIView):
         modification_id = self.kwargs['id']
         modification = get_object_or_404(self.queryset, pk=modification_id)
         user = request.user
-        user.likes.add(modification)
+        if modification in user.likes.all():
+            user.likes.remove(modification)
+            modification.likes.remove(user)
+            message = f'Like for modification with id {modification_id} removed'
+        else:
+            user.likes.add(modification)
+            modification.likes.add(user)
+            message = f'Like for modification with id {modification_id} added'
+
         user.save()
         serializer = self.serializer_class(modification)
-        return Response(serializer.data)
+        return Response({'message': message, 'modification': serializer.data})
 
 
 @api_view(['GET', 'POST'])

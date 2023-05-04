@@ -333,10 +333,14 @@ class ModificationGetSerializer(serializers.Serializer):
 class ModificationSerializer(serializers.ModelSerializer):
     is_compatible = serializers.BooleanField(read_only=True)
     is_compatible_cooling = serializers.BooleanField(read_only=True)
+    likes = serializers.SerializerMethodField()
 
     class Meta:
         model = Modification
         fields = '__all__'
+
+    def get_likes(self, obj):
+        return len([user.username for user in obj.likes.all()])
 
     def validate(self, data):
         if not data['cpu'].socket == data['motherboard'].socket:
