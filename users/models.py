@@ -8,7 +8,7 @@ class User(AbstractUser):
     phone = models.CharField(max_length=11)
     image = models.ImageField(upload_to='users_image', null=True, blank=True)
     modifications = models.ManyToManyField(Modification, blank=True, related_name='modifications')
-    likes = models.ManyToManyField(Modification, blank=True, related_name='likes')
+    likes = models.ManyToManyField(Modification, blank=True, related_name='liked_by')
 
     REQUIRED_FIELDS = []
 

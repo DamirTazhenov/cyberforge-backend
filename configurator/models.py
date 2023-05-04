@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 
 
@@ -367,6 +368,8 @@ class Accessory(BaseModel):
     headset = models.ForeignKey(Headset, on_delete=models.CASCADE, null=True)
 
 
+
+
 class Modification(models.Model):
     components_labels = [
         {'slug': 'housing', 'label': 'Корпус'},
@@ -386,6 +389,7 @@ class Modification(models.Model):
         max_digits=10, decimal_places=2, blank=True, null=True,
         help_text='Price calculated from the sum of prices of all components'
     )
+    likes = models.ManyToManyField('users.User', related_name='liked_modifications')
 
     housing = models.ForeignKey(Housing, on_delete=models.CASCADE, related_name='modifications')
     motherboard = models.ForeignKey(Motherboard, on_delete=models.CASCADE, related_name='modifications')

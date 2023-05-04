@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from main import settings
+from users.models import User
 from .models import Cooling, Housing, PowerSupplyUnit, RAM, GPU, Motherboard, CPU, Memory, Socket
 from .models import Modification
 
@@ -276,6 +277,7 @@ class ModificationGetSerializer(serializers.Serializer):
     description = serializers.CharField(max_length=255, default='')
     author_name = serializers.CharField(max_length=255)
     price = serializers.FloatField()
+    likes = serializers.SerializerMethodField()
 
     housing = HousingSerializer
     motherboard = MotherboardSerializer
@@ -296,6 +298,9 @@ class ModificationGetSerializer(serializers.Serializer):
         'memory': memory,
         'cooling': cooling
     }
+
+    def get_likes(self, obj):
+        return len([user.username for user in obj.likes.all()])
 
     def get_component(self, obj, comp):
         component_data = []
