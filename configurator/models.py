@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 
 
@@ -88,10 +87,6 @@ class Housing(BaseModel):
     compatible_board_form_factor = models.CharField(max_length=10)
     dimensions = models.CharField(max_length=15, help_text='(WxHxD) in cm', blank=True, null=True)
 
-    # power_supply_unit_location = models.CharField(max_length=10)
-    # number_of_5_25_bays = models.PositiveIntegerField()
-    # number_of_3_5_internal_bays = models.PositiveIntegerField()
-
     def __str__(self):
         return f"{self.name} case for {self.compatible_board_form_factor} motherboards, {' x '.join([i + 'cm' for i in self.dimensions.split('x')])}"
 
@@ -131,12 +126,6 @@ class PowerSupplyUnit(BaseModel):
     form_factor = models.CharField(max_length=50, choices=FORM_FACTOR_CHOICES)
     noise_level = models.CharField(max_length=20, choices=NOISE_LEVEL_CHOICES, default='A++')
 
-    # power_connectors = models.CharField(max_length=20)
-    # pci_e_connectors = models.PositiveIntegerField()
-    # molex_connectors = models.PositiveIntegerField()
-    # sata_connectors = models.PositiveIntegerField()
-    # adjustable_fan_speed = models.BooleanField(default=False)
-
     def __str__(self):
         return f"{self.name} ({self.psu_power}W, {self.efficiency}, {self.noise_level})"
 
@@ -157,10 +146,6 @@ class RAM(BaseModel):
     memory_type = models.CharField(max_length=4, choices=MEMORY_TYPE_CHOICES)
     memory_capacity = models.PositiveIntegerField(help_text='in GB')
     memory_clock_speed = models.PositiveIntegerField(help_text='in Mhz')
-
-    # supply_voltage = models.DecimalField(max_digits=3, decimal_places=1)
-    # timings = models.CharField(max_length=5)
-    # price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return f"{self.name} - {self.memory_capacity}GB {self.memory_type} RAM ({self.memory_clock_speed}MHz)"
@@ -215,8 +200,6 @@ class GPU(BaseModel):
     connectors = models.CharField(max_length=50)
     length = models.PositiveIntegerField(help_text='in mm')
 
-    # number_of_universal_processors = models.PositiveIntegerField()
-
     def __str__(self):
         return f"{self.chipset_model} {self.video_memory_capacity}GB ({self.video_memory_type}, {self.gpu_frequency} MHz, technical process - {self.technical_process}nm, connectors: {self.connectors})"
 
@@ -238,8 +221,6 @@ class Motherboard(BaseModel):
     socket = models.ForeignKey(Socket, on_delete=models.RESTRICT)
     form_factor = models.CharField(max_length=40, choices=FORM_FACTOR_CHOICES)
     num_memory_slots = models.IntegerField(default=4)
-    # num_pci_express_slots_x1 = models.IntegerField()
-    # num_pci_express_slots_x16 = models.IntegerField()
     power_connectors = models.IntegerField()
 
     def __str__(self):
@@ -268,19 +249,14 @@ class CPU(BaseModel):
     ]
 
     socket = models.ForeignKey(Socket, on_delete=models.RESTRICT)
-    # processor_type = models.CharField(max_length=10, choices=PROCESSOR_TYPE_CHOICES)
     total_number_of_cores = models.PositiveIntegerField()
     total_number_of_threads = models.PositiveIntegerField()
     clock_frequency = models.FloatField(help_text='in MHz')
     process_technology = models.PositiveIntegerField(help_text='in nm')
     rated_power = models.PositiveIntegerField(help_text='in W')
 
-    # microarchitecture = models.CharField(max_length=10)
-    # l3_cache_size = models.PositiveIntegerField(help_text='in MB')
-    # integrated_graphics_system = models.CharField(max_length=50)
-
     def __str__(self):
-        return f"{self.name} {self.total_number_of_cores} cores and {self.total_number_of_threads} threads ({self.socket})"
+        return f"{self.name} {self.total_number_of_cores} cores and {self.total_number_of_threads} threads ({self.socket}) "
 
 
 class Memory(BaseModel):
@@ -315,8 +291,6 @@ class Memory(BaseModel):
     disk_capacity = models.IntegerField(help_text='in GB')
     read_speed = models.FloatField(help_text='in mb/s')
     write_speed = models.FloatField(help_text='in mb/s')
-
-    # interface_transfer_rate = models.FloatField()
 
     def __str__(self):
         return f"{self.disk_capacity} GB {self.memory_type} ({self.interface} read:{self.read_speed} Gbit/s)"
@@ -366,8 +340,6 @@ class Accessory(BaseModel):
     monitor = models.ForeignKey(Monitor, on_delete=models.CASCADE, null=True)
     microphone = models.ForeignKey(Microphone, on_delete=models.CASCADE, null=True)
     headset = models.ForeignKey(Headset, on_delete=models.CASCADE, null=True)
-
-
 
 
 class Modification(models.Model):

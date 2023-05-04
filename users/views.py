@@ -1,58 +1,42 @@
-import jwt
-from braces.views import CsrfExemptMixin
-from django.contrib.auth import authenticate, get_user_model, login
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.serializers import jwt_encode_handler, jwt_payload_handler
-from rest_framework_jwt.views import verify_jwt_token, ObtainJSONWebToken
 from rest_framework_jwt.settings import api_settings
-
-from main import settings
+from rest_framework_jwt.views import ObtainJSONWebToken
 
 from users.serializers import UserSerializer
 
 User = get_user_model()
 
 
-class LoginPageAPIView(CsrfExemptMixin, APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        username = request.data['username']
-        password = request.data['password']
-
-        user = authenticate(username=username, password=password)
-
-        if user is None:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if not user.check_password(password):
-            raise AuthenticationFailed('Password is incorrect!')
-
-        payload = {'id': user.id}
-        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-        response = Response({'token': token}, status=200)
-        response['Authorization'] = f'Bearer {token}'
-
+class CustomObtainJSONWebToken(ObtainJSONWebToken):
+    def post(self, request, *args, **kwargs):
+        response = super(CustomObtainJSONWebToken, self).post(request, *args, **kwargs)
+        if response.status_code == status.HTTP_200_OK:
+            token = response.data['token']
+            jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
+            user_id = jwt_decode_handler(token)['user_id']
+            user = User.objects.get(id=user_id)
+            user_serializer = UserSerializer(user, context={'request': request})
+            response.data['user'] = user_serializer.data
         return response
 
 
 class RegisterPageAPIView(ObtainJSONWebToken):
+
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         username = serializer.create(serializer.validated_data).get('username')
 
-        # Authenticate user
         auth_user = authenticate(username=username, password=request.data['password'])
         if auth_user is None:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Generate JWT token
         payload = jwt_payload_handler(auth_user)
         token = jwt_encode_handler(payload)
 

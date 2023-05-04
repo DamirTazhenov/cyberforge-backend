@@ -14,14 +14,3 @@ class User(AbstractUser):
 
     class Meta:
         db_table = 'users_user'
-
-
-# class CustomModification(models.Model):
-#
-#     modification = models.ForeignKey(Modification, on_delete=models.CASCADE)
-#     users = models.ManyToManyField(User, blank=True)
-
-
-
-
-

@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import *
+
 admin.site.register(Modification)
 admin.site.register(Cooling)
 admin.site.register(Housing)

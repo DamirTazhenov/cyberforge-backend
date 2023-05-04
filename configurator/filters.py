@@ -1,4 +1,3 @@
-# filters.py
 from django_filters import rest_framework as filters
 from .models import *
 
@@ -11,6 +10,7 @@ class ModificationFilter(filters.FilterSet):
     class Meta:
         model = Modification
         fields = ['name', 'min_price', 'max_price']
+
 
 class ComponentFilter(filters.FilterSet):
     min_price = filters.NumberFilter(field_name='price', lookup_expr='gte')

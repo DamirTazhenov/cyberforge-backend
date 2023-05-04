@@ -1,8 +1,6 @@
 from django.urls import path
-from rest_framework_jwt.views import obtain_jwt_token
 
-from .serializers import CustomObtainJSONWebToken
-from .views import RegisterPageAPIView, UserAPIView
+from .views import RegisterPageAPIView, UserAPIView, CustomObtainJSONWebToken
 
 app_name = 'users'
 

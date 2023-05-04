@@ -1,27 +1,14 @@
 from rest_framework import serializers
 
 from main import settings
-from users.models import User
 from .models import Cooling, Housing, PowerSupplyUnit, RAM, GPU, Motherboard, CPU, Memory, Socket
 from .models import Modification
 
 
 class get_spec_ser:
-    # def __init__(self, *args, **kwargs):
-    #     flag = kwargs.pop('flag', None)
-    #     super().__init__(*args, **kwargs)
-    #     self.flag = flag
-
-
 
     def get_spec(self, obj):
         spec_data = []
-        # if self.context.get('flag'):
-        #     for label in obj.spec_labels:
-        #         value = getattr(obj, label['slug'], None)
-        #         spec_data.append(str(value))
-        #
-        # else:
         for label in obj.spec_labels:
             value = getattr(obj, label['slug'], None)
             if value is not None:
@@ -32,8 +19,6 @@ class get_spec_ser:
                 })
 
         return spec_data
-
-
 
 
 class SocketSerializer(serializers.ModelSerializer):
@@ -107,8 +92,6 @@ class CoolingSerializer2(serializers.Serializer, get_spec_ser):
             socket, _ = Socket.objects.get_or_create(name=socket_data['name'])
             instance.sockets.add(socket)
         return instance
-
-
 
 
 class CoolingSerializer(serializers.ModelSerializer):
@@ -251,7 +234,6 @@ class CPUSerializer(serializers.ModelSerializer, get_spec_ser):
 
 
 class MemorySerializer(serializers.ModelSerializer, get_spec_ser):
-
     class Meta:
         model = Memory
         fields = '__all__'
@@ -267,8 +249,6 @@ class MemorySerializer(serializers.ModelSerializer, get_spec_ser):
         ret = super().to_representation(instance)
         ret['spec'] = self.get_spec(instance)
         return ret
-
-
 
 
 class ModificationGetSerializer(serializers.Serializer):
@@ -307,7 +287,7 @@ class ModificationGetSerializer(serializers.Serializer):
         for label in obj.components_labels:
             value = getattr(obj, label['slug'], None)
             if value is not None:
-                serializer = comp[label['slug']](value, context={'request': self.context.get('request')}) #, context={'flag': False, 'comp': comp[label['slug']]})
+                serializer = comp[label['slug']](value, context={'request': self.context.get('request')})
                 value = serializer.data
                 component_data.append(value)
 
@@ -318,10 +298,7 @@ class ModificationGetSerializer(serializers.Serializer):
         ret['components'] = self.get_component(instance, self.comp)
         return ret
 
-
-
     def validate(self, data):
-        # proverka sovmestimosti proccessors and materi
         if not data['cpu'].socket == data['motherboard'].socket:
             raise serializers.ValidationError("Processor and motherboard are not compatible.")
         elif not data['motherboard'].socket in data['cooling'].socket:
@@ -352,6 +329,7 @@ class ModificationGetSerializer(serializers.Serializer):
         image_url = obj.image.url
         return request.build_absolute_uri(image_url)
 
+
 class ModificationSerializer(serializers.ModelSerializer):
     is_compatible = serializers.BooleanField(read_only=True)
     is_compatible_cooling = serializers.BooleanField(read_only=True)
@@ -361,7 +339,6 @@ class ModificationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        # проверка совместимости процессоров и материнских плат
         if not data['cpu'].socket == data['motherboard'].socket:
             raise serializers.ValidationError("Processor and motherboard are not compatible.")
         elif not data['motherboard'].socket in data['cooling'].sockets.all():

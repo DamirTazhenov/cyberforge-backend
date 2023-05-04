@@ -2,10 +2,9 @@ import jwt
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseForbidden
-from rest_framework.exceptions import AuthenticationFailed
 
 User = get_user_model()
+
 
 class JWTAuthenticationMiddleware:
     def __init__(self, get_response):

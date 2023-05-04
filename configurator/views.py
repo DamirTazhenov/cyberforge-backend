@@ -1,7 +1,6 @@
-from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, mixins, status, filters
+from rest_framework import generics, mixins, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -26,22 +25,6 @@ class PaginationClassModification(PageNumberPagination):
     page_size = 5
     page_size_query_param = 'page_size'
     max_page_size = 10
-
-
-# class ComponentViewSet:
-#     def get_queryset(self):
-#         queryset = super().get_queryset()
-#
-#         # Получаем значение параметра name из GET-запроса
-#         name = self.request.query_params.get('name')
-#         min_price = self.request.query_params.get('min_price')
-#         max_price = self.request.query_params.get('max_price')
-#
-#         # Если параметр name присутствует, фильтруем по имени
-#         if name:
-#             queryset = queryset.filter(Q(name__icontains=name, ))
-#
-#         return queryset
 
 
 class ModificationList(mixins.UpdateModelMixin, mixins.ListModelMixin, mixins.CreateModelMixin,
