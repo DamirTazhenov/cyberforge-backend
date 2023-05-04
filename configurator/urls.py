@@ -4,7 +4,8 @@ from .views import *
 app_name = 'configurator'
 urlpatterns = [
     path('modifications/', ModificationList.as_view(), name='modifications-list'),
-    path('modifications/<int:id>/', ModificationDetail.as_view(), name='configurator-detail'),
+    path('modifications/<int:id>/', ModificationDetail.as_view(), name='modification-detail'),
+    path('modifications/like/<int:id>/', LikeModificationView.as_view(), name='modification-like'),
     path('cooling/', CoolingList.as_view(), name='cooling-list'),
     path('cooling/<int:id>/', CoolingDetail.as_view(), name='cooling-detail'),
     path('housing/', HousingList.as_view(), name='housing-list'),

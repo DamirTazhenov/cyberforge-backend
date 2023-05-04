@@ -382,18 +382,33 @@ class Modification(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=255, default='')
     author_name = models.CharField(max_length=255, blank=True)
-    likes = models.PositiveIntegerField(default=0)
+    price = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True,
+        help_text='Price calculated from the sum of prices of all components'
+    )
 
-    housing = models.ForeignKey(Housing, on_delete=models.CASCADE)
-    motherboard = models.ForeignKey(Motherboard, on_delete=models.CASCADE)
-    power_supply_unit = models.ForeignKey(PowerSupplyUnit, on_delete=models.CASCADE)
-    cpu = models.ForeignKey(CPU, on_delete=models.CASCADE)
-    gpu = models.ForeignKey(GPU, on_delete=models.CASCADE)
-    ram = models.ForeignKey(RAM, on_delete=models.CASCADE)
-    memory = models.ForeignKey(Memory, on_delete=models.CASCADE)
-    cooling = models.ForeignKey(Cooling, on_delete=models.CASCADE)
+    housing = models.ForeignKey(Housing, on_delete=models.CASCADE, related_name='modifications')
+    motherboard = models.ForeignKey(Motherboard, on_delete=models.CASCADE, related_name='modifications')
+    power_supply_unit = models.ForeignKey(PowerSupplyUnit, on_delete=models.CASCADE, related_name='modifications')
+    cpu = models.ForeignKey(CPU, on_delete=models.CASCADE, related_name='modifications')
+    gpu = models.ForeignKey(GPU, on_delete=models.CASCADE, related_name='modifications')
+    ram = models.ForeignKey(RAM, on_delete=models.CASCADE, related_name='modifications')
+    memory = models.ForeignKey(Memory, on_delete=models.CASCADE, related_name='modifications')
+    cooling = models.ForeignKey(Cooling, on_delete=models.CASCADE, related_name='modifications')
 
-    # accessories = models.ManyToManyField(Accessory)
+    def save(self, *args, **kwargs):
+        total_price = 0
+        total_price += self.housing.price
+        total_price += self.motherboard.price
+        total_price += self.power_supply_unit.price
+        total_price += self.cpu.price
+        total_price += self.gpu.price
+        total_price += self.ram.price
+        total_price += self.memory.price
+        total_price += self.cooling.price
+
+        self.price = total_price
+        super(Modification, self).save(*args, **kwargs)
 
     def is_compatible_cooling(self):
         return self.motherboard.socket in self.cooling.sockets.all()

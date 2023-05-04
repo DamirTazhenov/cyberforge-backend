@@ -268,12 +268,14 @@ class MemorySerializer(serializers.ModelSerializer, get_spec_ser):
         return ret
 
 
+
+
 class ModificationGetSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField(max_length=255)
     description = serializers.CharField(max_length=255, default='')
     author_name = serializers.CharField(max_length=255)
-    likes = serializers.IntegerField(default=0)
+    price = serializers.FloatField()
 
     housing = HousingSerializer
     motherboard = MotherboardSerializer

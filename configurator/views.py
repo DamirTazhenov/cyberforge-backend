@@ -1,12 +1,13 @@
 from django.db.models import Q
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, mixins, status, filters
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
-from .filters import ComponentFilter
+from .filters import ComponentFilter, ModificationFilter
 from .serializers import *
 
 User = get_user_model()
@@ -25,9 +26,6 @@ class PaginationClassModification(PageNumberPagination):
     page_size = 5
     page_size_query_param = 'page_size'
     max_page_size = 10
-
-    class Meta:
-        ordering = ['-likes']
 
 
 # class ComponentViewSet:
@@ -49,6 +47,7 @@ class PaginationClassModification(PageNumberPagination):
 class ModificationList(mixins.UpdateModelMixin, mixins.ListModelMixin, mixins.CreateModelMixin,
                        generics.GenericAPIView):
     pagination_class = PaginationClassModification
+    filterset_class = ModificationFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -56,7 +55,7 @@ class ModificationList(mixins.UpdateModelMixin, mixins.ListModelMixin, mixins.Cr
         return ModificationSerializer
 
     def get_queryset(self):
-        return Modification.objects.all()
+        return Modification.objects.all().order_by('price')
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -72,6 +71,8 @@ class ModificationList(mixins.UpdateModelMixin, mixins.ListModelMixin, mixins.Cr
         modification = serializer.save()
         user = self.request.user
         user.modifications.add(modification)
+
+
 
 
 class ModificationDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin,
@@ -94,6 +95,20 @@ class ModificationDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mix
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+
+
+class LikeModificationView(mixins.CreateModelMixin, generics.GenericAPIView):
+    queryset = Modification.objects.all()
+    serializer_class = ModificationSerializer
+
+    def post(self, request, *args, **kwargs):
+        modification_id = self.kwargs['id']
+        modification = get_object_or_404(self.queryset, pk=modification_id)
+        user = request.user
+        user.likes.add(modification)
+        user.save()
+        serializer = self.serializer_class(modification)
+        return Response(serializer.data)
 
 
 @api_view(['GET', 'POST'])
@@ -137,7 +152,6 @@ class HousingList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Gener
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PaginationClass
     filterset_class = ComponentFilter
-
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -186,7 +200,6 @@ class PowerSupplyUnitList(mixins.ListModelMixin, generics.GenericAPIView):
     pagination_class = PaginationClass
     filterset_class = ComponentFilter
 
-
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
@@ -207,7 +220,6 @@ class RAMList(mixins.ListModelMixin, generics.GenericAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PaginationClass
     filterset_class = ComponentFilter
-
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -230,7 +242,6 @@ class GPUList(mixins.ListModelMixin, generics.GenericAPIView):
     pagination_class = PaginationClass
     filterset_class = ComponentFilter
 
-
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
@@ -251,7 +262,6 @@ class MotherboardList(mixins.ListModelMixin, generics.GenericAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PaginationClass
     filterset_class = ComponentFilter
-
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)

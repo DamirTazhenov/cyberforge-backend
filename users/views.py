@@ -1,6 +1,6 @@
 import jwt
 from braces.views import CsrfExemptMixin
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import authenticate, get_user_model, login
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.serializers import jwt_encode_handler, jwt_payload_handler
-from rest_framework_jwt.views import verify_jwt_token
+from rest_framework_jwt.views import verify_jwt_token, ObtainJSONWebToken
 from rest_framework_jwt.settings import api_settings
 
 from main import settings
@@ -41,24 +41,30 @@ class LoginPageAPIView(CsrfExemptMixin, APIView):
         return response
 
 
-
-class RegisterPageAPIView(APIView):
+class RegisterPageAPIView(ObtainJSONWebToken):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.create(serializer.validated_data)
+        username = serializer.create(serializer.validated_data).get('username')
 
-        token = jwt_encode_handler(jwt_payload_handler(request.user))
-        return Response({
-            'token': token,
-            'user': serializer.data
-        })
+        # Authenticate user
+        auth_user = authenticate(username=username, password=request.data['password'])
+        if auth_user is None:
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Generate JWT token
+        payload = jwt_payload_handler(auth_user)
+        token = jwt_encode_handler(payload)
+
+        response = Response({'token': token, 'user': serializer.data}, status=status.HTTP_201_CREATED)
+
+        return response
 
 
 class UserAPIView(APIView):
     def get(self, request):
         if request.user.is_authenticated:
-            serializer = UserSerializer(request.user,  context={'request': request})
+            serializer = UserSerializer(request.user, context={'request': request})
 
             return Response(serializer.data)
         else:
